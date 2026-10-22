@@ -215,7 +215,9 @@ def extract_webpage_content(url):
             'url': url
         }
 
-API_KEY = "AIzaSyCKtkY2b5j08igbYUoRI60-YJk-otVhtsU"
+import os
+
+API_KEY = os.getenv("GOOGLE_API_KEY")
 MODEL = "gemini-1.5-flash"
 
 def is_question_related(user_query, webpage_content):
