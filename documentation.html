@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Documentation – Smart Webpage Analyzer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      transition: all 0.5s ease;
+    }
+
+    body.dark-theme::before {
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    }
+
+    body.light-theme::before {
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(34, 197, 94, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    }
+
+    body.dark-theme {
+      color: #f1f5f9;
+    }
+
+    body.light-theme {
+      color: #1e293b;
+    }
+
+    /* Animated background particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .dark-theme .particle {
+      background: rgba(148, 163, 184, 0.3);
+    }
+
+    .light-theme .particle {
+      background: rgba(59, 130, 246, 0.2);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+      50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+    }
+
+    /* Navigation */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      z-index: 1000;
+      transition: all 0.3s ease;
+      height: 70px;
+      display: flex;
+      align-items: center;
+    }
+
+    .light-theme .navbar {
+      background: rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .logo-text {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-emoji {
+      color: initial;
+      background: none;
+      -webkit-text-fill-color: initial;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2.5rem;
+      align-items: center;
+      margin: 0;
+    }
+
+    .nav-links li {
+      margin: 0;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      padding: 0.5rem 0;
+      position: relative;
+      opacity: 0.8;
+    }
+
+    .dark-theme .nav-links a {
+      color: #f1f5f9;
+    }
+
+    .light-theme .nav-links a {
+      color: #1e293b;
+    }
+
+    .nav-links a:hover {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .nav-links a.active {
+      color: #3b82f6;
+      opacity: 1;
+    }
+
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 1px;
+    }
+
+    #themeToggle {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+    }
+
+    .light-theme #themeToggle {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    #themeToggle:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-top: 70px;
+      padding: 3rem 2rem;
+      min-height: calc(100vh - 70px);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem;
+      background: var(--bg-card, rgba(255, 255, 255, 0.08));
+      border-radius: 12px;
+      box-shadow: var(--shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.3));
+      border: 1px solid var(--border-color, rgba(255, 255, 255, 0.18));
+      transition: all 0.3s ease;
+    }
+
+    .light-theme .container {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    h2 {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent-blue, #4299e1);
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h2:first-of-type {
+      margin-top: 0;
+    }
+
+    p, li {
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-top: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    ul li {
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+
+    ul li::marker {
+      color: var(--accent-cyan, #0bc5ea);
+    }
+
+    ol {
+      padding-left: 1.5rem;
+      margin-top: 1rem;
+      counter-reset: step-counter;
+    }
+
+    ol li {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+      background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-blue, #4299e1);
+      list-style: none;
+      counter-increment: step-counter;
+      position: relative;
+      margin-left: -1.5rem;
+      padding-left: 3.5rem;
+    }
+
+    ol li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--accent-blue, #4299e1);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    pre {
+      background-color: var(--code-bg, rgba(255, 255, 255, 0.05));
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-color, rgba(255, 255, 255, 0.18));
+      position: relative;
+      margin: 1rem 0;
+    }
+
+    code {
+      background-color: var(--code-bg, rgba(255, 255, 255, 0.05));
+      color: var(--accent-cyan, #0bc5ea);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.9em;
+      border: 1px solid var(--border-color, rgba(255, 255, 255, 0.18));
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--text-primary);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.18));
+      margin: 2rem 0;
+      opacity: 0.6;
+    }
+
+    strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    h2:contains("Features") + ul li,
+    h2[id*="features"] + ul li {
+      background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid var(--accent-cyan, #0bc5ea);
+      transition: all 0.3s ease;
+      list-style: none;
+      margin-left: -1.5rem;
+      padding-left: 1.5rem;
+    }
+
+    h2 + ul li strong {
+      color: var(--accent-blue, #4299e1);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .nav-container {
+        padding: 0 1rem;
+      }
+
+      .main-content {
+        padding: 2rem 1rem;
+      }
+
+      .container {
+        padding: 2rem 1.5rem;
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      ol li {
+        margin-left: 0;
+        padding-left: 3.5rem;
+      }
+    }
+
+    .container {
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .container:hover {
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .light-theme .container:hover {
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  <!-- Animated particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('home') }}" class="logo"><span class="logo-emoji">🚀</span><span class="logo-text">CHAT AI</span></a>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('pricing') }}">Pricing</a></li>
+        <li><a href="{{ url_for('features') }}">Features</a></li>
+        <li><a href="{{ url_for('documentation') }}" class="active">Documentation</a></li>
+                <li> <a href="{{ url_for('activity') }}">Your Activity</a></li>
+
+        <li>
+          <button id="themeToggle" title="Toggle Theme">
+            <span id="themeIcon">🌙</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="container">
+      <h1>📘 Smart Webpage Analyzer – User Guide</h1>
+      <hr>
+
+      <h2>📌 What is Smart Webpage Analyzer?</h2>
+      <p>
+        Smart Webpage Analyzer is an easy-to-use tool that lets you analyze any website by simply entering its URL. It includes a chat assistant, modern interface, and supports both light and dark themes.
+      </p>
+
+      <h2>🌟 What You Can Do</h2>
+      <ul>
+        <li>Submit a website URL to get insights and analysis</li>
+        <li>Chat with our assistant to learn about the webpage structure</li>
+        <li>Toggle between Light 🌞 and Dark 🌙 mode</li>
+        <li>Navigate across different sections easily</li>
+      </ul>
+
+      <h2>🖱️ How to Use</h2>
+      <ol>
+        <li>Go to the Home page</li>
+        <li>Paste any website URL into the input field</li>
+        <li>Click the submit button</li>
+        <li>Interact with the assistant for detailed analysis</li>
+        <li>Toggle the theme using the icon in the top-right corner</li>
+      </ol>
+
+      <h2>⚠️ Things to Know</h2>
+      <ul>
+        <li>Currently supports basic analysis only</li>
+        <li>Doesn’t store your data or chat history</li>
+      </ul>
+
+      <h2>🚀 Coming Soon</h2>
+      <ul>
+        <li>Advanced SEO & performance scoring</li>
+        <li>Exportable reports</li>
+        <li>Account-based history</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    // Theme Toggle Functionality
+    const toggleButton = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const body = document.body;
+
+    if (!toggleButton || !body || !themeIcon) {
+      console.error('Theme toggle elements not found');
+    } else {
+      // Load saved theme or default to dark
+      let savedTheme = 'dark';
+      try {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme) {
+          savedTheme = JSON.parse(storedTheme);
+        }
+      } catch (e) {
+        console.warn('Error accessing localStorage:', e);
+      }
+
+      // Apply the saved theme
+      body.className = `${savedTheme}-theme`;
+      themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+      // Toggle theme on button click
+      toggleButton.addEventListener('click', () => {
+        const isDark = body.classList.contains('dark-theme');
+        const newTheme = isDark ? 'light' : 'dark';
+
+        // Update body class
+        body.className = `${newTheme}-theme`;
+        themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+
+        // Store theme preference
+        try {
+          localStorage.setItem('theme', JSON.stringify(newTheme));
+        } catch (e) {
+          console.warn('Error saving theme to localStorage:', e);
+        }
+      });
+    }
+
+    // Particle System
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      if (!particlesContainer) return;
+      const particleCount = Math.min(window.innerWidth / 20, 50);
+
+      // Clear existing particles
+      particlesContainer.innerHTML = '';
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Initialize particles on load
+    document.addEventListener('DOMContentLoaded', createParticles);
+
+    // Handle window resize for particles
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        createParticles();
+      }, 250);
+    });
+  </script>
+</body>
+</html>
+
+
+

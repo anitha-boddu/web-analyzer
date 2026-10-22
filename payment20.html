@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Subscribe – ₹20 Plan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+     body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-arrow {
+      color: #6b7280;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .container {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      min-height: calc(100vh - 73px);
+    }
+
+    .left-panel {
+      width: 50%;
+      background: white;
+      padding: 40px;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .right-panel {
+      width: 50%;
+      background: #f8f9fa;
+      padding: 40px;
+    }
+
+    .subscription-title {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+
+    .price {
+      font-size: 48px;
+      font-weight: 300;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .price-period {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+
+    .billing-summary {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 24px;
+      margin-top: 40px;
+    }
+
+    .billing-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .billing-row.total {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 16px;
+      margin-top: 16px;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .billing-label {
+      color: #374151;
+      font-size: 16px;
+    }
+
+    .billing-value {
+      color: #111827;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .tax-info {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .form-section {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 16px;
+    }
+
+    .contact-info {
+      background: #f3f4f6;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .contact-label {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .contact-value {
+      color: #111827;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 16px;
+      background: white;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .card-icons {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .card-icon {
+      width: 32px;
+      height: 20px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .visa { background: #1a1f71; }
+    .mastercard { background: #eb001b; }
+    .amex { background: #006fcf; }
+    .discover { background: #ff6000; }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+    }
+
+    .checkbox-label {
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .link {
+      color: #3b82f6;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .btn-pay {
+      width: 100%;
+      padding: 14px;
+      background-color: #10b981;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-pay:hover {
+      background-color: #059669;
+    }
+
+    .success-msg {
+      margin-top: 20px;
+      text-align: center;
+      color: #10b981;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    #loadingSpinner {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #10b981;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .left-panel, .right-panel {
+        width: 100%;
+      }
+      
+      .form-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="back-arrow">←</span>
+    <span class="logo">Gemini</span>
+  </div>
+
+  <div class="container">
+    <div class="left-panel">
+      <div class="subscription-title">Subscribe to Gemini Plus Subscription</div>
+      <div class="price">₹199</div>
+      <div class="price-period">per month</div>
+
+      <div class="plan-details">
+        <h3 style="color: #111827; font-size: 20px; margin-bottom: 16px;">Plan Details</h3>
+        <p style="color: #374151; margin-bottom: 16px;"><strong>Gemini Plus Subscription</strong></p>
+        <ul style="color: #374151; padding-left: 20px; line-height: 1.6;">
+          <li>Price: ₹199 /session</li>
+          <li>Faster response time</li>
+          <li>Priority access to new features</li>
+          <li>Access to Gemini Advanced</li>
+        </ul>
+      </div>
+
+      <div class="billing-summary">
+        <div class="billing-row">
+          <span class="billing-label">Gemini Plus Subscription</span>
+          <span class="billing-value">₹199</span>
+        </div>
+        <div class="billing-row">
+          <span class="billing-label" style="font-size: 14px;">Billed monthly</span>
+        </div>
+        <div class="billing-row">
+          <span class="billing-label">Subtotal</span>
+          <span class="billing-value">₹199</span>
+        </div>
+        <div class="billing-row">
+          <span class="billing-label">Tax</span>
+          <span class="tax-info">Enter address to calculate</span>
+        </div>
+        <div class="billing-row total">
+          <span class="billing-label">Total due today</span>
+          <span class="billing-value">₹199</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="form-section">
+        <h3 class="section-title">Contact information</h3>
+        <div class="contact-info">
+          <div class="contact-label">Email</div>
+          <div class="contact-value">harshithakothapalli30@gmail.com</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title">Payment method</h3>
+        <form id="paymentForm">
+          <div class="form-group">
+            <label>Card information</label>
+            <input type="text" id="cardNumber" maxlength="16" placeholder="1234 1234 1234 1234" required>
+            <div class="card-icons">
+              <div class="card-icon visa">VISA</div>
+              <div class="card-icon mastercard">MC</div>
+              <div class="card-icon amex">AMEX</div>
+              <div class="card-icon discover">DISC</div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <input type="text" id="expiry" placeholder="MM / YY" required>
+            </div>
+            <div class="form-group">
+              <input type="text" id="cvv" maxlength="3" placeholder="CVC" pattern="\d{3}" title="Enter 3-digit CVV" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cardholderName">Cardholder name</label>
+            <input type="text" id="cardholderName" placeholder="Full name on card" required>
+          </div>
+
+          <div class="form-group">
+            <label for="country">Billing address</label>
+            <select id="country" required>
+              <option value="India">India</option>
+              <option value="US">United States</option>
+              <option value="UK">United Kingdom</option>
+              <option value="Canada">Canada</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <input type="text" id="address" placeholder="Address" required>
+          </div>
+
+          <div class="form-group">
+            <input type="text" id="otp" placeholder="One Time Password" required>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="saveInfo">
+            <label for="saveInfo" class="checkbox-label">
+              Securely save my information for 1-click checkout<br>
+              <span style="color: #6b7280;">Pay faster on Gemini and everywhere Link is accepted.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-pay">Pay ₹199</button>
+        </form>
+        <div id="loadingSpinner">
+          <div class="spinner"></div>
+          <div style="margin-top: 10px; color: #6b7280;">Processing payment, please wait...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById("paymentForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const expiryInput = document.getElementById("expiry").value;
+    const expiryParts = expiryInput.split("/");
+
+    // Validate expiry format
+    if (expiryParts.length !== 2 || !/^\d{2}\/\d{2}$/.test(expiryInput)) {
+      alert("⚠ Expiry format must be MM/YY.");
+      return;
+    }
+
+    const month = parseInt(expiryParts[0], 10);
+    const year = parseInt("20" + expiryParts[1], 10);
+    const today = new Date();
+    const expiryDate = new Date(year, month - 1);
+
+    if (isNaN(month) || isNaN(year) || month < 1 || month > 12) {
+      alert("⚠ Invalid expiry date.");
+      return;
+    }
+
+    if (expiryDate < today) {
+      alert("⚠ Expiry date must be in the future.");
+      return;
+    }
+
+    const cvv = document.getElementById("cvv").value;
+    if (!/^\d{3}$/.test(cvv)) {
+      alert("⚠ CVV must be 3 digits.");
+      return;
+    }
+
+    // Show spinner
+    document.getElementById("paymentForm").style.display = "none";
+    document.getElementById("loadingSpinner").style.display = "block";
+
+    // Simulate delay then show success
+    setTimeout(() => {
+      document.getElementById("loadingSpinner").style.display = "none";
+      const panel = document.querySelector(".right-panel");
+
+      panel.innerHTML += `
+        <div class="success-msg">✅ Payment Successful! You are now subscribed.</div>
+        <div style="text-align:center; margin-top: 20px;">
+          <a href="/url-input">
+            <button style="
+              background-color: #10b981;
+              color: white;
+              font-size: 16px;
+              font-weight: 600;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+            ">Go to Dashboard</button>
+          </a>
+        </div>
+      `;
+
+      // Save subscription status
+      localStorage.setItem("subscribed", "true");
+
+      // Notify server
+      fetch('/payment-success', { method: 'POST' });
+    }, 3000);
+  });
+</script>
+
+</body>
+</html>

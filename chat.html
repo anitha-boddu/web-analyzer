@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Web Analyzer - Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles from URL Page */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      color: #f1f5f9; /* Default dark theme color */
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      transition: all 0.5s ease;
+    }
+
+    body.dark-theme::before {
+      background:
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    }
+
+    body.light-theme::before {
+      background:
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(34, 197, 94, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    }
+
+    body.dark-theme {
+      color: #f1f5f9;
+    }
+
+    body.light-theme {
+      color: #1e293b;
+    }
+
+    /* Animated background particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .dark-theme .particle {
+      background: rgba(148, 163, 184, 0.3);
+    }
+
+    .light-theme .particle {
+      background: rgba(59, 130, 246, 0.2);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+      50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+    }
+
+    /* Animations for panels */
+    @keyframes slideFadeInLeft {
+      0% { opacity: 0; transform: translateX(-30px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideFadeInRight {
+      0% { opacity: 0; transform: translateX(30px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes messageFadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Left panel */
+    .left-container {
+      width: 70%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      animation: slideFadeInLeft 0.6s ease forwards;
+    }
+    .iframe-wrapper {
+      width: 100%;
+      height: 90vh;
+      background: rgba(255, 255, 255, 0.08); /* From URL page container */
+      backdrop-filter: blur(32px); /* From URL page container */
+      -webkit-backdrop-filter: blur(32px); /* From URL page container */
+      border: 1px solid rgba(255, 255, 255, 0.18); /* From URL page container */
+      border-radius: 24px; /* From URL page container */
+      box-shadow:
+        0 32px 64px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 1px 0 rgba(255, 255, 255, 0.1) inset;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .light-theme .iframe-wrapper {
+      background: rgba(255, 255, 255, 0.85); /* From URL page container */
+      border: 1px solid rgba(255, 255, 255, 0.3); /* From URL page container */
+      box-shadow:
+        0 32px 64px -12px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(0, 0, 0, 0.05) inset;
+    }
+    .iframe-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 20px; /* Slightly smaller than wrapper border-radius to show border */
+    }
+
+    /* Right panel */
+    .right {
+      width: 30%;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      background: rgba(255, 255, 255, 0.08); /* From URL page container */
+      backdrop-filter: blur(32px); /* From URL page container */
+      -webkit-backdrop-filter: blur(32px); /* From URL page container */
+      border: 1px solid rgba(255, 255, 255, 0.18); /* From URL page container */
+      border-radius: 24px; /* Consistent with other elements */
+      box-shadow:
+        0 32px 64px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 1px 0 rgba(255, 255, 255, 0.1) inset;
+      animation: slideFadeInRight 0.6s ease forwards;
+      margin: 20px; /* Adjusted to sit within body padding */
+      margin-left: 0; /* Remove left margin for cleaner layout */
+      height: 90vh; /* To match iframe wrapper height */
+    }
+    .light-theme .right {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow:
+        0 32px 64px -12px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(0, 0, 0, 0.05) inset;
+    }
+
+    /* --- Start New/Updated CSS for Buttons --- */
+    .new-chat {
+      align-self: flex-end;
+      margin-bottom: 15px;
+      display: flex; /* Make it a flex container */
+      gap: 10px; /* Add some space between buttons */
+    }
+    .new-chat a {
+      text-decoration: none;
+      color: white;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); /* Consistent with main button */
+      padding: 10px 18px;
+      border-radius: 10px; /* Consistent with main button */
+      font-weight: 600;
+      font-size: 13px;
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); /* Consistent with main button */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: inline-block; /* To make overflow hidden work */
+    }
+    .new-chat a::before { /* Shimmer effect */
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .new-chat a:hover::before {
+      left: 100%;
+    }
+    .new-chat a:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 12px 35px -5px rgba(59, 130, 246, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+    .new-chat a:active {
+      transform: translateY(0);
+    }
+
+    /* Styles for the new pricing button */
+    .pricing-button {
+      text-decoration: none;
+      color: white;
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); /* Green/Teal gradient */
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); /* Shadow for new gradient */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .pricing-button::before { /* Shimmer effect */
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .pricing-button:hover::before {
+      left: 100%;
+    }
+
+    .pricing-button:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 12px 35px -5px rgba(16, 185, 129, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+
+    .pricing-button:active {
+      transform: translateY(0);
+    }
+
+    /* Light theme adjustments for the pricing button */
+    body.light-theme .pricing-button {
+      background: linear-gradient(135deg, #059669 0%, #0891b2 100%); /* Darker for light theme */
+      box-shadow: 0 8px 20px rgba(5, 150, 105, 0.2);
+    }
+
+    body.light-theme .pricing-button:hover {
+      box-shadow: 0 12px 35px -5px rgba(5, 150, 105, 0.3);
+    }
+    /* --- End New/Updated CSS --- */
+
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid rgba(148, 163, 184, 0.2); /* Consistent with input border */
+      padding: 14px;
+      border-radius: 12px; /* Consistent with input/container */
+      background: rgba(255, 255, 255, 0.05); /* Consistent with webpage-info */
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.15); /* Softer inner shadow */
+      transition: all 0.3s ease;
+    }
+    .light-theme .chat-box {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(148, 163, 184, 0.3);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
+      color: #1e293b;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      animation: messageFadeIn 0.4s ease forwards;
+      opacity: 0;
+    }
+    .message.user {
+      background-color: #3b82f6; /* Brighter blue for user */
+      color: white;
+      text-align: right;
+    }
+    .message.bot {
+      background-color: #334155; /* Slightly lighter gray */
+      color: #e2e8f0; /* Light text for dark theme */
+    }
+    .light-theme .message.bot {
+      background-color: #cbd5e1; /* Light gray for bot in light theme */
+      color: #1e293b; /* Dark text for light theme */
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 1rem 1rem; /* Consistent with URL input */
+      font-size: 1rem; /* Consistent with URL input */
+      border: 2px solid rgba(148, 163, 184, 0.2); /* Consistent with URL input */
+      border-radius: 12px; /* Consistent with URL input */
+      background: rgba(255, 255, 255, 0.05); /* Consistent with URL input */
+      color: #f1f5f9; /* Consistent with URL input */
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .light-theme .input-area input {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: rgba(148, 163, 184, 0.3);
+      color: #1e293b;
+    }
+    .input-area input:focus {
+      border-color: #3b82f6;
+      box-shadow:
+        0 0 0 4px rgba(59, 130, 246, 0.1),
+        0 4px 15px -2px rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
+    }
+    .input-area input::placeholder { /* Add placeholder color from URL page */
+      color: #94a3b8;
+      opacity: 0.7;
+    }
+    .light-theme .input-area input::placeholder {
+      color: #64748b;
+    }
+
+    .input-area button {
+      padding: 1rem 1.5rem; /* Consistent with URL button */
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); /* Consistent with URL button */
+      color: white;
+      border: none;
+      border-radius: 12px; /* Consistent with URL button */
+      font-weight: 700; /* Consistent with URL button */
+      font-size: 1rem; /* Consistent with URL button */
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .input-area button::before { /* Shimmer effect */
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .input-area button:hover::before {
+      left: 100%;
+    }
+    .input-area button:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 12px 35px -5px rgba(59, 130, 246, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+    .input-area button:active {
+      transform: translateY(0);
+    }
+
+    /* Scrollbar consistent with URL page */
+    .chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+    .chat-box::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 4px;
+    }
+    .chat-box::-webkit-scrollbar-thumb {
+      background-color: rgba(148, 163, 184, 0.5);
+      border-radius: 4px;
+    }
+    .light-theme .chat-box::-webkit-scrollbar-thumb {
+      background-color: rgba(59, 130, 246, 0.3);
+    }
+
+
+    /* Toggle Theme Button */
+    #themeToggleBtn {
+      position: fixed;
+      top: 20px; /* Adjusted position */
+      right: 20px; /* Adjusted position */
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 44px; /* Consistent with URL page toggle */
+      height: 44px; /* Consistent with URL page toggle */
+      border-radius: 12px; /* Consistent with URL page toggle */
+      font-size: 1.4rem; /* Larger icon */
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f1f5f9;
+    }
+    .light-theme #themeToggleBtn {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #1e293b;
+    }
+    #themeToggleBtn:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Subscribe button after limit */
+    #subscribeWarning {
+      background-color: #b91c1c; /* red */
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(185, 28, 28, 0.4);
+    }
+    .light-theme #subscribeWarning {
+      background-color: #dc2626; /* Slightly brighter red for light theme */
+      color: white;
+    }
+
+    #subscribeBtn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 1rem 2rem; /* Consistent with main button */
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); /* Consistent with main button */
+      color: white;
+      border: none;
+      border-radius: 12px; /* Consistent with main button */
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #subscribeBtn::before { /* Shimmer effect */
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    #subscribeBtn:hover::before {
+      left: 100%;
+    }
+    #subscribeBtn:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 12px 35px -5px rgba(59, 130, 246, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+    #subscribeBtn:active {
+      transform: translateY(0);
+    }
+
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      body {
+        flex-direction: column;
+        height: auto;
+      }
+      .left-container, .right {
+        width: 100%;
+        height: auto;
+        margin: 0; /* Remove fixed margins */
+        padding: 20px;
+      }
+      .iframe-wrapper {
+        height: 60vh; /* Adjust iframe height for smaller screens */
+        margin-bottom: 20px;
+      }
+      .right {
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 24px;
+        padding-top: 20px;
+      }
+      .light-theme .right {
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      #themeToggleBtn {
+        top: 10px;
+        right: 10px;
+        width: 38px;
+        height: 38px;
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .left-container, .right {
+        padding: 15px;
+      }
+      .iframe-wrapper {
+        height: 50vh;
+      }
+      .input-area input, .input-area button, #subscribeBtn {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+      }
+      #subscribeWarning {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .left-container, .right {
+        padding: 10px;
+      }
+      .iframe-wrapper {
+        height: 40vh;
+      }
+      .right {
+        border-radius: 16px;
+      }
+      .input-area {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .input-area button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  <div class="particles" id="particles"></div>
+
+  <div class="left-container">
+    <div class="iframe-wrapper">
+      <iframe src="{{ url }}" id="webpageFrame"></iframe>
+    </div>
+  </div>
+  <div class="right">
+    <div class="new-chat">
+      <a href="/new-chat">New Chat</a>
+      <a href="/pricing" class="pricing-button">Premium</a>
+    </div>
+    <div class="chat-box" id="chatBox" aria-live="polite">
+      <div class="message bot" style="opacity: 1;">
+        <strong>CHAT AI:</strong> Hi! I can help you understand and analyze the webpage you're currently viewing.
+      </div>
+    </div>
+    <div class="input-area" id="inputArea">
+      <input type="text" id="userInput" placeholder="Ask about this webpage..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+    <div id="subscribeContainer" style="display:none;">
+      <div id="subscribeWarning">⚠ Message limit reached. Please subscribe to continue chatting.</div>
+      <button id="subscribeBtn" onclick="handleSubscription()">Subscribe Now</button>
+    </div>
+  </div>
+  <button id="themeToggleBtn">🌙</button>
+
+<script>
+// Particle System
+function createParticles() {
+  const particlesContainer = document.getElementById('particles');
+  if (!particlesContainer) return;
+  const particleCount = Math.min(window.innerWidth / 20, 50);
+
+  // Clear existing particles before creating new ones
+  particlesContainer.innerHTML = '';
+
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 6 + 's';
+    particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+    particlesContainer.appendChild(particle);
+  }
+}
+
+// Initialize particles on load
+document.addEventListener('DOMContentLoaded', createParticles);
+
+// Handle window resize for particles
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    const particlesContainer = document.getElementById('particles');
+    if (particlesContainer) {
+      particlesContainer.innerHTML = '';
+      createParticles();
+    }
+  }, 250);
+});
+
+
+// Chat functionality
+let userMessageCount = 0;
+const maxMessages = 5;
+
+// Check if subscribed
+let isSubscribed = localStorage.getItem("subscribed") === "true";
+if (isSubscribed) {
+  userMessageCount = 0;
+  document.getElementById('userInput').disabled = false;
+  document.querySelector('.input-area button').disabled = false;
+  document.getElementById('subscribeContainer').style.display = 'none';
+}
+
+function appendMessage(sender, text, cls) {
+  const chatBox = document.getElementById('chatBox');
+  const msg = document.createElement('div');
+  msg.className = `message ${cls}`;
+  msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  msg.style.animationDelay = `${userMessageCount * 0.1}s`;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+  setTimeout(() => { msg.style.opacity = '1'; }, userMessageCount * 100);
+  return msg;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const message = input.value.trim();
+  if (!message) return;
+
+  if (message.startsWith('http://') || message.startsWith('https://')) {
+    alert("⚠ URLs are not allowed in chat.");
+    return;
+  }
+
+  // Check limit
+  if (!isSubscribed && userMessageCount >= maxMessages) {
+    document.getElementById('inputArea').style.display = 'none';
+    document.getElementById('subscribeContainer').style.display = 'block';
+    return;
+  }
+
+  appendMessage('You', message, 'user');
+  input.value = '';
+  userMessageCount++;
+
+  const typing = appendMessage('CHAT AI', 'IS TYPING ...', 'bot');
+  try {
+    const res = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    const data = await res.json();
+    typing.remove();
+    appendMessage('CHAT AI', data.reply, 'bot');
+  } catch (error) {
+    console.error("Error sending message:", error);
+    typing.remove();
+    appendMessage('CHAT AI', '❌ Sorry, something went wrong. Please try again.', 'bot');
+  }
+}
+
+function handleSubscription() {
+  window.location.href = '/payment20';
+}
+
+document.getElementById('userInput').addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// Theme toggle
+const toggleBtn = document.getElementById('themeToggleBtn');
+const body = document.body;
+
+function updateThemeIcon(isLight) {
+  toggleBtn.textContent = isLight ? '☀️' : '🌙';
+}
+
+// Set initial theme based on localStorage
+if (localStorage.getItem('theme') === 'light') {
+  body.classList.add('light-theme');
+  updateThemeIcon(true);
+} else {
+  body.classList.add('dark-theme');
+  updateThemeIcon(false);
+}
+
+toggleBtn.addEventListener('click', () => {
+  body.classList.toggle('light-theme');
+  body.classList.toggle('dark-theme');
+  const isLight = body.classList.contains('light-theme');
+  updateThemeIcon(isLight);
+  if (isLight) localStorage.setItem('theme', 'light');
+  else localStorage.setItem('theme', 'dark');
+});
+
+// Enhanced input interactions (copied from URL page for consistency)
+document.querySelectorAll('.input-area input').forEach((input) => {
+  input.addEventListener('focus', function () {
+    this.style.transform = 'translateY(-1px)';
+  });
+
+  input.addEventListener('blur', function () {
+    this.style.transform = 'translateY(0)';
+  });
+});
+</script>
+
+</body>
+</html>
